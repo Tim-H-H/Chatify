@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
-import "./index.css";
+import "../src/index.css";
 
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
