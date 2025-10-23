@@ -24,6 +24,8 @@ export default function Register() {
     };
 
     try {
+      // Lägg in ett request till fetchCsrf så du har token här.
+      // Lägg till resultatet av det i payload.
       await registerUser(payload);
       alert("Registrering lyckades! Logga in.");
       navigate("/login");
