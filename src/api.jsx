@@ -1,4 +1,3 @@
-// src/api.js
 import axios from "axios";
 
 export const API_BASE = "https://chatify-api.up.railway.app";
@@ -52,7 +51,6 @@ export async function deleteUser(userId) {
 export async function inviteUser(userId) {
   return api.post(`/invite/${userId}`);
 }
-
 export async function getConversations() {
   return api.get("/conversations");
 }

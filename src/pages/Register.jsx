@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api";
+import { fetchCsrf, registerUser } from "../api";
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", email: "", password: "" });
@@ -21,11 +21,17 @@ export default function Register() {
       username: form.username.trim(),
       email: form.email.trim(),
       password: form.password,
+      avatar: ""
+       
     };
 
     try {
       // Lägg in ett request till fetchCsrf så du har token här.
       // Lägg till resultatet av det i payload.
+      const res = await fetchCsrf();
+      const csrfToken = res.data?.csrfToken;
+      payload.csrfToken = csrfToken;
+      console.log("CSRF response", res.data);
       await registerUser(payload);
       alert("Registrering lyckades! Logga in.");
       navigate("/login");
