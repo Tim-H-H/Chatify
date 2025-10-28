@@ -7,35 +7,11 @@ import {
 } from "../api";
 import { v4 as uuidv4 } from "uuid";
 import AuthContext from "../context/AuthContext";
-
-function Message({ msg, isOwn, onDelete }) {
-  return (
-    <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
-      <div
-        className={`max-w-[70%] p-3 rounded ${
-          isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
-        }`}
-      >
-        <div className="text-sm">{msg.content}</div>
-        <div className="text-xs mt-2 text-gray-200">
-          {new Date(msg.createdAt || Date.now()).toLocaleString()}
-        </div>
-        {isOwn && (
-          <button
-            onClick={() => onDelete(msg.id || msg._id)}
-            className="text-xs text-red-100 mt-2"
-          >
-            Radera
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+import Message from "../components/Message";
 
 export default function Chat() {
   const { user } = useContext(AuthContext);
-  const [convs, setConvs] = useState([]);
+  const [conversations, setConversations] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
@@ -50,27 +26,27 @@ export default function Chat() {
 
   async function fetchConversations() {
     try {
-      const res = await getConversations();
-      const data = res.data || {};
+      const response = await getConversations();
+      const data = response.data || {};
+      const conversationGroups = response.data || {};
 
-      const conversationsGroups = res.data || {};
-
+      console.log("data: ", data);
       const ids = Array.from(new Set([
-        ...(conversationsGroups.invitesReceived || []),
-        ...(conversationsGroups.invitesSent || []),
-        ...(conversationsGroups.participating || []),
+        ...(conversationGroups.invitesReceived || []),
+        ...(conversationGroups.invitesSent || []),
+        ...(conversationGroups.participating || []),
       ]));
 
       if (data.length > 0) {
         const list = ids.map(id => ({ id, title: id }));
-        setConvs(list);
+        setConversations(list);
         setSelected(list[0].id);
       } else {
         const fallback = [
           { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
           { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
         ];
-        setConvs(fallback);
+        setConversations(fallback);
         setSelected(fallback[0].id);
       }
     } catch (err) {
@@ -79,7 +55,7 @@ export default function Chat() {
         { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
         { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
       ];
-      setConvs(fallback);
+      setConversations(fallback);
       setSelected(fallback[0].id);
     }
   }
@@ -89,7 +65,6 @@ export default function Chat() {
     try {
       const res = await getMessages({ conversationId: convId });
       const raw = res.data || [];
-
       const normalized = raw.map((m) => ({
         ...m,
         id: m.id ?? m._id ?? m.messageId,
@@ -114,8 +89,10 @@ export default function Chat() {
   async function handleSend() {
     if (!newMsg.trim()) return;
     const clean = newMsg.trim();
+    // console.log("clean: ", clean);
+    // console.log("selected: ", selected);
     try {
-      await createMessage({ conversationId: selected, text: clean });
+      await createMessage({ text: clean, conversationId: selected });
       setNewMsg("");
       fetchMessagesFor(selected);
     } catch (err) {
@@ -138,17 +115,17 @@ export default function Chat() {
       <aside className="w-1/4 bg-white p-4 rounded shadow">
         <h3 className="font-semibold mb-3">Konversationer</h3>
         <ul className="space-y-2">
-          {convs.map((c) => (
-            <li key={c.id || c._id || c.conversationId}>
+          {conversations.map((conversation) => (
+            <li key={conversation.id}>
               <button
-                onClick={() => setSelected(c.id || c._id || c.conversationId)}
+                onClick={() => setSelected(conversation.id)}
                 className={`w-full text-left px-3 py-2 rounded ${
-                  selected === (c.id || c._id || c.conversationId)
+                  selected === conversation.id
                     ? "bg-blue-100"
                     : "hover:bg-gray-50"
                 }`}
               >
-                {c.title || c.name || c.id || c._id || c.conversationId}
+                {conversation.title || conversation.name || conversation.id}
               </button>
             </li>
           ))}
@@ -164,11 +141,11 @@ export default function Chat() {
               {messages.length === 0 && (
                 <div className="text-gray-400">Inga meddelanden</div>
               )}
-              {messages.map((m) => (
+              {messages.map((msg) => (
                 <Message
-                  key={m.id || m._id}
-                  msg={m}
-                  isOwn={(m.userId || m.user?.id) === user.id}
+                  key={msg.id || msg._id}
+                  msg={msg}
+                  isOwn={(msg.userId || msg.user?.id) === user.id}
                   onDelete={handleDelete}
                 />
               ))}
