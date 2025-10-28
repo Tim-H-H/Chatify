@@ -5,16 +5,7 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import "../src/index.css";
 
-import * as Sentry from "@sentry/react";
-import { Integrations } from "@sentry/tracing";
 
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
-  });
-}
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

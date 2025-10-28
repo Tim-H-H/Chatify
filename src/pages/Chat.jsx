@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   getConversations,
   getMessages,
@@ -51,10 +51,20 @@ export default function Chat() {
   async function fetchConversations() {
     try {
       const res = await getConversations();
-      const data = res.data || [];
-      if (data.length >= 2) {
-        setConvs(data);
-        setSelected(data[0].id || data[0]._id || data[0].conversationId);
+      const data = res.data || {};
+
+      const conversationsGroups = res.data || {};
+
+      const ids = Array.from(new Set([
+        ...(conversationsGroups.invitesReceived || []),
+        ...(conversationsGroups.invitesSent || []),
+        ...(conversationsGroups.participating || []),
+      ]));
+
+      if (data.length > 0) {
+        const list = ids.map(id => ({ id, title: id }));
+        setConvs(list);
+        setSelected(list[0].id);
       } else {
         const fallback = [
           { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
@@ -75,9 +85,26 @@ export default function Chat() {
   }
 
   async function fetchMessagesFor(convId) {
+    const requestFor = convId;
     try {
       const res = await getMessages({ conversationId: convId });
-      setMessages(res.data || []);
+      const raw = res.data || [];
+
+      const normalized = raw.map((m) => ({
+        ...m,
+        id: m.id ?? m._id ?? m.messageId,
+        content: m.content ?? m.text ?? "",
+        userId: m.userId ?? m.user?.id ?? m.user_id ?? null,
+        createdAt: m.createdAt ?? m.created_at ?? null,
+      }));
+
+      normalized.sort(
+        (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+      );
+
+      if (selected === requestFor) {
+    setMessages(normalized);    
+      }
     } catch (err) {
       console.error("Kunde inte hämta meddelanden", err);
       setMessages([]);
@@ -88,7 +115,7 @@ export default function Chat() {
     if (!newMsg.trim()) return;
     const clean = newMsg.trim();
     try {
-      await createMessage({ conversationId: selected, content: clean });
+      await createMessage({ conversationId: selected, text: clean });
       setNewMsg("");
       fetchMessagesFor(selected);
     } catch (err) {
