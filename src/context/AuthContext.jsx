@@ -25,28 +25,38 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const csrfRes = await fetchCsrf();
-      console.log("csrfRes: ", csrfRes)
+      console.log("csrfRes: ", csrfRes);
       const token = csrfRes.data?.csrfToken;
       if (!token) throw new Error("Ingen token mottagen från API");
-      const res = await tokenAuth({ username, password, csrfToken:token });
+      const tokenAuthResult = await tokenAuth({
+        username,
+        password,
+        csrfToken: token,
+      });
+
+      console.log("tokenAuthResult: ", tokenAuthResult);
 
       let decoded = {};
+      const jwtToken = tokenAuthResult.data?.token;
       try {
-        decoded = jwtDecode(token);
-      } catch (e) {
-        console.warn("Kunde inte dekoda token", e);
+        console.log("token in try catch in login function: ", token);
+        decoded = jwtDecode(jwtToken);
+      } catch (err) {
+        console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);
       }
       console.log("JWT token ", decoded);
 
       const authUser = {
         token,
-        id: decoded?.sub || decoded?.id || res.data?.user?.id,
-        username: decoded?.username || res.data?.user?.username || username,
-        avatar: res.data?.user?.avatar || "https://i.pravatar.cc/40",
+        id: decoded?.sub || decoded?.id || tokenAuthResult.data?.user?.id,
+        username:
+          decoded?.username || tokenAuthResult.data?.user?.username || username,
+        avatar:
+          tokenAuthResult.data?.user?.avatar || "https://i.pravatar.cc/40",
       };
 
       localStorage.setItem("chatify_auth", JSON.stringify(authUser));
-      setAuthToken(token);
+      setAuthToken(jwtToken);
       setUser(authUser);
       setLoading(false);
       return authUser;
