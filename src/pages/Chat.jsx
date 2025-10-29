@@ -12,7 +12,7 @@ import Message from "../components/Message";
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
-  const [selectedIdId, setSelectedIdId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
 
