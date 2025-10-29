@@ -1,8 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { tokenAuth, fetchCsrf } from "../api";
+import { tokenAuth, fetchCsrf, setAuthToken } from "../api";
 
-import { setAuthToken } from "../api";
 
 const AuthContext = createContext();
 
@@ -25,7 +24,6 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const csrfRes = await fetchCsrf();
-      console.log("csrfRes: ", csrfRes);
       const token = csrfRes.data?.csrfToken;
       if (!token) throw new Error("Ingen token mottagen från API");
       const tokenAuthResult = await tokenAuth({
@@ -39,7 +37,6 @@ export function AuthProvider({ children }) {
       let decoded = {};
       const jwtToken = tokenAuthResult.data?.token;
       try {
-        console.log("token in try catch in login function: ", token);
         decoded = jwtDecode(jwtToken);
       } catch (err) {
         console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);

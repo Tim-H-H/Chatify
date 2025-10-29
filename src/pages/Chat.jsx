@@ -12,7 +12,7 @@ import Message from "../components/Message";
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
 
@@ -21,8 +21,8 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if (selected) fetchMessagesFor(selected);
-  }, [selected]);
+    if (selectedId) fetchMessagesFor(selectedId);
+  }, [selectedId]);
 
   async function fetchConversations() {
     try {
@@ -40,31 +40,34 @@ export default function Chat() {
       if (data.length > 0) {
         const list = ids.map(id => ({ id, title: id }));
         setConversations(list);
-        setSelected(list[0].id);
+        setSelectedId(list[0].id);
       } else {
         const fallback = [
           { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
           { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
         ];
         setConversations(fallback);
-        setSelected(fallback[0].id);
+        setSelectedId(fallback[0].id);
       }
     } catch (err) {
+      // console.error("status:", err.response?.status);
+      // console.error("headers:", err.response?.headers);
+      // console.error("data:", err.response?.data);
       console.error(err);
       const fallback = [
         { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
         { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
       ];
       setConversations(fallback);
-      setSelected(fallback[0].id);
+      setSelectedId(fallback[0].id);
     }
   }
 
-  async function fetchMessagesFor(convId) {
-    const requestFor = convId;
+  async function fetchMessagesFor(conversationId) {
     try {
-      const res = await getMessages({ conversationId: convId });
-      const raw = res.data || [];
+      console.log("conversationId: ", conversationId );
+      const messageResult = await getMessages({ conversationId });
+      const raw = messageResult.data || [];
       const normalized = raw.map((m) => ({
         ...m,
         id: m.id ?? m._id ?? m.messageId,
@@ -73,11 +76,11 @@ export default function Chat() {
         createdAt: m.createdAt ?? m.created_at ?? null,
       }));
 
-      normalized.sort(
-        (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-      );
+      // normalized.sort(
+      //   (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+      // );
 
-      if (selected === requestFor) {
+      if (selectedId === conversationId) {
     setMessages(normalized);    
       }
     } catch (err) {
@@ -90,11 +93,11 @@ export default function Chat() {
     if (!newMsg.trim()) return;
     const clean = newMsg.trim();
     // console.log("clean: ", clean);
-    // console.log("selected: ", selected);
+    // console.log("selectedId: ", selectedId);
     try {
-      await createMessage({ text: clean, conversationId: selected });
+      await createMessage({ text: clean, conversationId: selectedId });
       setNewMsg("");
-      fetchMessagesFor(selected);
+      fetchMessagesFor(selectedId);
     } catch (err) {
       console.error("Skickfel", err);
     }
@@ -104,7 +107,7 @@ export default function Chat() {
     if (!confirm("Vill du radera meddelandet?")) return;
     try {
       await deleteMessage(msgId);
-      fetchMessagesFor(selected);
+      fetchMessagesFor(selectedId);
     } catch (err) {
       console.error("Radera fel", err);
     }
@@ -118,9 +121,9 @@ export default function Chat() {
           {conversations.map((conversation) => (
             <li key={conversation.id}>
               <button
-                onClick={() => setSelected(conversation.id)}
+                onClick={() => setSelectedId(conversation.id)}
                 className={`w-full text-left px-3 py-2 rounded ${
-                  selected === conversation.id
+                  selectedId === conversation.id
                     ? "bg-blue-100"
                     : "hover:bg-gray-50"
                 }`}
@@ -133,7 +136,7 @@ export default function Chat() {
       </aside>
 
       <section className="flex-1 bg-white p-4 rounded shadow flex flex-col">
-        {!selected ? (
+        {!selectedId ? (
           <div className="text-gray-500">Välj en konversation</div>
         ) : (
           <>
