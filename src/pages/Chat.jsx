@@ -12,7 +12,7 @@ import Message from "../components/Message";
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIdId, setSelectedIdId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
 
@@ -67,11 +67,10 @@ export default function Chat() {
   }
 
   async function fetchMessagesFor(conversationId) {
-    console.log("fetchMessagesFor - conversationId: ", conversationId);
-    const requestFor = conversationId;
     try {
-      const res = await getMessages({ conversationId });
-      const raw = res.data || [];
+      console.log("conversationId: ", conversationId);
+      const messageResult = await getMessages({ conversationId });
+      const raw = messageResult.data || [];
       const normalized = raw.map((m) => ({
         ...m,
         id: m.id ?? m._id ?? m.messageId,
@@ -80,11 +79,11 @@ export default function Chat() {
         createdAt: m.createdAt ?? m.created_at ?? null,
       }));
 
-      normalized.sort(
-        (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-      );
+      // normalized.sort(
+      //   (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+      // );
 
-      if (selectedId === requestFor) {
+      if (selectedId === conversationId) {
         setMessages(normalized);
       }
     } catch (err) {
