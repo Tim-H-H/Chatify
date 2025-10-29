@@ -12,7 +12,7 @@ import Message from "../components/Message";
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
 
@@ -21,49 +21,56 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if (selected) fetchMessagesFor(selected);
-  }, [selected]);
+    if (selectedId) fetchMessagesFor(selectedId);
+  }, [selectedId]);
 
   async function fetchConversations() {
     try {
+      console.log("TRY - fetchConversations - selectedId: ", selectedId);
       const response = await getConversations();
       const data = response.data || {};
       const conversationGroups = response.data || {};
 
-      console.log("data: ", data);
-      const ids = Array.from(new Set([
-        ...(conversationGroups.invitesReceived || []),
-        ...(conversationGroups.invitesSent || []),
-        ...(conversationGroups.participating || []),
-      ]));
+      // console.log("data: ", data);
+      const ids = Array.from(
+        new Set([
+          ...(conversationGroups.invitesReceived || []),
+          ...(conversationGroups.invitesSent || []),
+          ...(conversationGroups.participating || []),
+        ])
+      );
 
       if (data.length > 0) {
-        const list = ids.map(id => ({ id, title: id }));
+        const list = ids.map((id) => ({ id, title: id }));
         setConversations(list);
-        setSelected(list[0].id);
+        setSelectedId(list[0].id);
       } else {
         const fallback = [
           { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
           { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
         ];
         setConversations(fallback);
-        setSelected(fallback[0].id);
+        setSelectedId(fallback[0].id);
       }
     } catch (err) {
-      console.error(err);
+      console.error(
+        "fetchConversations(): Ett fel inträffade när konversationer skulle hämtas: ",
+        err
+      );
       const fallback = [
         { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
         { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
       ];
       setConversations(fallback);
-      setSelected(fallback[0].id);
+      setSelectedId(fallback[0].id);
     }
   }
 
-  async function fetchMessagesFor(convId) {
-    const requestFor = convId;
+  async function fetchMessagesFor(conversationId) {
+    console.log("fetchMessagesFor - conversationId: ", conversationId);
+    const requestFor = conversationId;
     try {
-      const res = await getMessages({ conversationId: convId });
+      const res = await getMessages({ conversationId });
       const raw = res.data || [];
       const normalized = raw.map((m) => ({
         ...m,
@@ -77,8 +84,8 @@ export default function Chat() {
         (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
       );
 
-      if (selected === requestFor) {
-    setMessages(normalized);    
+      if (selectedId === requestFor) {
+        setMessages(normalized);
       }
     } catch (err) {
       console.error("Kunde inte hämta meddelanden", err);
@@ -90,11 +97,11 @@ export default function Chat() {
     if (!newMsg.trim()) return;
     const clean = newMsg.trim();
     // console.log("clean: ", clean);
-    // console.log("selected: ", selected);
+    // console.log("selectedId: ", selectedId);
     try {
-      await createMessage({ text: clean, conversationId: selected });
+      await createMessage({ text: clean, conversationId: selectedId });
       setNewMsg("");
-      fetchMessagesFor(selected);
+      fetchMessagesFor(selectedId);
     } catch (err) {
       console.error("Skickfel", err);
     }
@@ -104,7 +111,7 @@ export default function Chat() {
     if (!confirm("Vill du radera meddelandet?")) return;
     try {
       await deleteMessage(msgId);
-      fetchMessagesFor(selected);
+      fetchMessagesFor(selectedId);
     } catch (err) {
       console.error("Radera fel", err);
     }
@@ -118,9 +125,9 @@ export default function Chat() {
           {conversations.map((conversation) => (
             <li key={conversation.id}>
               <button
-                onClick={() => setSelected(conversation.id)}
+                onClick={() => setSelectedId(conversation.id)}
                 className={`w-full text-left px-3 py-2 rounded ${
-                  selected === conversation.id
+                  selectedId === conversation.id
                     ? "bg-blue-100"
                     : "hover:bg-gray-50"
                 }`}
@@ -133,7 +140,7 @@ export default function Chat() {
       </aside>
 
       <section className="flex-1 bg-white p-4 rounded shadow flex flex-col">
-        {!selected ? (
+        {!selectedId ? (
           <div className="text-gray-500">Välj en konversation</div>
         ) : (
           <>

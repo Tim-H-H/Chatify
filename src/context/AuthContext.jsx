@@ -25,7 +25,6 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const csrfRes = await fetchCsrf();
-      console.log("csrfRes: ", csrfRes);
       const token = csrfRes.data?.csrfToken;
       if (!token) throw new Error("Ingen token mottagen från API");
       const tokenAuthResult = await tokenAuth({
@@ -34,17 +33,13 @@ export function AuthProvider({ children }) {
         csrfToken: token,
       });
 
-      console.log("tokenAuthResult: ", tokenAuthResult);
-
       let decoded = {};
       const jwtToken = tokenAuthResult.data?.token;
       try {
-        console.log("token in try catch in login function: ", token);
         decoded = jwtDecode(jwtToken);
       } catch (err) {
         console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);
       }
-      console.log("JWT token ", decoded);
 
       const authUser = {
         token,
