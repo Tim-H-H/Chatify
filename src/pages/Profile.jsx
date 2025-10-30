@@ -12,10 +12,10 @@ export default function Profile() {
     if (user?.id) {
       (async () => {
         try {
-          const res = await getUser(user.id);
-          const u = res.data;
-          setForm({ username: u.username || "", email: u.email || "", avatar: u.avatar || "" });
-          setPreview(u.avatar || "");
+          const result = await getUser(user.id);
+          const userResult = result.data;
+          setForm({ username: userResult.username || "", email: userResult.email || "", avatar: userResult.avatar || "" });
+          setPreview(userResult.avatar || "");
         } catch (err) {
           console.error(err);
         }
@@ -32,9 +32,16 @@ export default function Profile() {
   async function onSave(e) {
     e.preventDefault();
     try {
-      await updateUser({ username: form.username, email: form.email, avatar: form.avatar });
+      await updateUser({ 
+        userId: Number(user.id), 
+        updatedData: {
+        username: form.username, 
+        email: form.email, 
+        avatar: form.avatar
+        },
+      });
       setMsg("Uppdatering lyckades");
-      // uppdatera lokalt auth object
+
       setUser(prev => ({ ...prev, username: form.username, avatar: form.avatar }));
       const raw = JSON.parse(localStorage.getItem("chatify_auth") || "{}");
       localStorage.setItem("chatify_auth", JSON.stringify({ ...raw, username: form.username, avatar: form.avatar }));

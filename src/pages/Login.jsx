@@ -5,7 +5,8 @@ import AuthContext from "../context/AuthContext";
 export default function Login() {
   const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ username: "", password: "" });
-  const [error, setError] = useState(null);
+  const [isError, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   function onChange(e) {
@@ -18,16 +19,17 @@ export default function Login() {
     try {
       await login({ username: form.username, password: form.password });
       navigate("/chat");
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || "Invalid credentials";
-      setError(msg);
+    } catch (error) {
+      setError(true);
+      setErrorMsg("Ogiltiga inloggningsuppgifter");
+      console.log("Login.jsx: onSubmit: Error:", error);
     }
   }
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
       <h1 className="text-xl font-bold mb-4">Logga in</h1>
-      {error && <div className="mb-3 text-red-600">{error}</div>}
+      {isError && <div className="mb-3 text-red-600">{errorMsg}</div>}
       <form onSubmit={onSubmit} className="space-y-3">
         <input name="username" value={form.username} onChange={onChange} placeholder="Username" className="w-full p-2 border rounded" />
         <input name="password" type="password" value={form.password} onChange={onChange} placeholder="Password" className="w-full p-2 border rounded" />
