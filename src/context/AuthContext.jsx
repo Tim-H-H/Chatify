@@ -17,31 +17,34 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user?.token) setAuthToken(user.token);
+    if (user?.jwtToken) setAuthToken(user.jwtToken);
   }, [user]);
 
   async function login({ username, password }) {
     setLoading(true);
     try {
-      const csrfRes = await fetchCsrf();
-      const token = csrfRes.data?.csrfToken;
-      if (!token) throw new Error("Ingen token mottagen från API");
+      const csrfResult = await fetchCsrf();
+      const csrftoken = csrfResult.data?.csrfToken;
+      if (!csrftoken) throw new Error("Ingen token mottagen från API");
       const tokenAuthResult = await tokenAuth({
         username,
         password,
-        csrfToken: token,
+        csrfToken: csrftoken,
       });
 
       let decoded = {};
       const jwtToken = tokenAuthResult.data?.token;
       try {
         decoded = jwtDecode(jwtToken);
+        console.log("decoded: ", decoded);
       } catch (err) {
         console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);
       }
+      
 
       const authUser = {
-        token,
+        jwtToken,
+        csrftoken,
         id: decoded?.sub || decoded?.id || tokenAuthResult.data?.user?.id,
         username:
           decoded?.username || tokenAuthResult.data?.user?.username || username,

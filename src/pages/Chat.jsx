@@ -28,6 +28,7 @@ export default function Chat() {
     try {
       console.log("TRY - fetchConversations - selectedId: ", selectedId);
       const response = await getConversations();
+      console.log("response: ", response)
       const data = response.data || {};
       const conversationGroups = response.data || {};
 
