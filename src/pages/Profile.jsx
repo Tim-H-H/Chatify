@@ -50,6 +50,16 @@ export default function Profile() {
     }
   }
 
+  function nextAvatarUrl(userId) {
+    return `https://i.pravatar.cc/150?=${userId}-${Date.now}`;
+  }
+
+  function handleRandomAvatar() {
+    const avatarUrl = nextAvatarUrl(user?.id);
+    setForm(prev => ({ ...prev, avatar: avatarUrl}));
+    setPreview(avatarUrl);
+  }
+
   async function handleDelete() {
     if (!confirm("Vill du radera ditt konto? Detta går inte att ångra.")) return;
     try {
@@ -69,6 +79,7 @@ export default function Profile() {
         <input name="username" value={form.username} onChange={onChange} placeholder="Username" className="w-full p-2 border rounded" />
         <input name="email" value={form.email} onChange={onChange} placeholder="Email" className="w-full p-2 border rounded" />
         <input name="avatar" value={form.avatar} onChange={onChange} placeholder="Avatar URL" className="w-full p-2 border rounded" />
+        <button type="button" onClick={handleRandomAvatar} className="px-3 py-2 bg-gray-200 rounded">Slumpa Avatar</button>
         {preview && <img src={preview} alt="preview" className="w-24 h-24 rounded mt-2" />}
         <div className="flex gap-2 mt-3">
           <button className="px-4 py-2 bg-blue-600 text-white rounded">Spara</button>
