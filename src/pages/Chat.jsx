@@ -16,20 +16,32 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
 
-  useEffect(() => {
-    fetchConversations();
-  }, []);
+  // useEffect(() => {
+  //   fetchConversations();
+  // }, []);
+
+useEffect(() => {
+  console.log("useEffect - fetchconversations");
+  if(user?.jwtToken) fetchConversations();
+}, [user?.jwtToken]);
+
+
 
   useEffect(() => {
+    console.log("useEffect - fetchMessagesFor");
     if (selectedId) fetchMessagesFor(selectedId);
   }, [selectedId]);
 
   async function fetchConversations() {
     try {
-      console.log("TRY - fetchConversations - selectedId: ", selectedId);
+      // console.log("jwtToken: ", user.jwtToken );
+      // console.log("csrftoken: ", user.csrftoken);
+      console.log("user: ", user);
+
+      // console.log("TRY - fetchConversations - selectedId: ", selectedId);
       const response = await getConversations();
       console.log("response: ", response)
-      const data = response.data || {};
+      // const data = response.data || {};
       const conversationGroups = response.data || {};
 
       // console.log("data: ", data);
@@ -41,7 +53,7 @@ export default function Chat() {
         ])
       );
 
-      if (data.length > 0) {
+      if (ids.length > 0) {
         const list = ids.map((id) => ({ id, title: id }));
         setConversations(list);
         setSelectedId(list[0].id);

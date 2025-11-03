@@ -5,7 +5,7 @@ import { getUser, updateUser, deleteUser } from "../api";
 export default function Profile() {
   const { user, logout, setUser } = useContext(AuthContext);
   const [form, setForm] = useState({ username: "", email: "", avatar: "" });
-  const [preview, setPreview] = useState(null);
+  // const [preview, setPreview] = useState(null);
   const [msg, setMsg] = useState(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function Profile() {
           const result = await getUser(user.id);
           const userResult = result.data;
           setForm({ username: userResult.username || "", email: userResult.email || "", avatar: userResult.avatar || "" });
-          setPreview(userResult.avatar || "");
+          // setPreview(userResult.avatar || "");
         } catch (err) {
           console.error(err);
         }
@@ -26,7 +26,7 @@ export default function Profile() {
   function onChange(e) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    if (name === "avatar") setPreview(value);
+    // if (name === "avatar") setPreview(value);
   }
 
   async function onSave(e) {
@@ -50,15 +50,7 @@ export default function Profile() {
     }
   }
 
-  function nextAvatarUrl(userId) {
-    return `https://i.pravatar.cc/150?=${userId}-${Date.now}`;
-  }
 
-  function handleRandomAvatar() {
-    const avatarUrl = nextAvatarUrl(user?.id);
-    setForm(prev => ({ ...prev, avatar: avatarUrl}));
-    setPreview(avatarUrl);
-  }
 
   async function handleDelete() {
     if (!confirm("Vill du radera ditt konto? Detta går inte att ångra.")) return;
@@ -79,8 +71,6 @@ export default function Profile() {
         <input name="username" value={form.username} onChange={onChange} placeholder="Username" className="w-full p-2 border rounded" />
         <input name="email" value={form.email} onChange={onChange} placeholder="Email" className="w-full p-2 border rounded" />
         <input name="avatar" value={form.avatar} onChange={onChange} placeholder="Avatar URL" className="w-full p-2 border rounded" />
-        <button type="button" onClick={handleRandomAvatar} className="px-3 py-2 bg-gray-200 rounded">Slumpa Avatar</button>
-        {preview && <img src={preview} alt="preview" className="w-24 h-24 rounded mt-2" />}
         <div className="flex gap-2 mt-3">
           <button className="px-4 py-2 bg-blue-600 text-white rounded">Spara</button>
           <button type="button" onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded">Radera konto</button>

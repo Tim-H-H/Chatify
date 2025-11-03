@@ -10,6 +10,15 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  if(!config.headers?.Authorization) {
+    const chatifyJson = localStorage.getItem("chatify_auth");
+    const jwt = JSON.parse(chatifyJson)?.jwtToken || null;
+    if(jwt) config.headers.Authorization = `Bearer ${jwt}`;
+  }
+  return config;
+})
+
 
 export function setAuthToken(token) {
   if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;

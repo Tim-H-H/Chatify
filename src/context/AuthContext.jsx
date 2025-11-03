@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
       const raw = localStorage.getItem("chatify_auth");
       return raw ? JSON.parse(raw) : null;
     } catch {
+      console.warn("Authprovider: setUser: No value found in local storage, returning null")
       return null;
     }
   });
@@ -41,7 +42,6 @@ export function AuthProvider({ children }) {
         console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);
       }
       
-
       const authUser = {
         jwtToken,
         csrftoken,
