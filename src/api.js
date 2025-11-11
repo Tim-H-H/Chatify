@@ -63,8 +63,8 @@ export async function inviteUser(userId) {
 export async function getConversations() {
   return api.get("/conversations");
 }
-export async function getMessages(params = {}) { // e.g. { conversationId, userId, limit }
-  return api.get("/messages", { params });
+export async function getMessages( conversationId ) { // e.g. { conversationId, userId, limit }
+  return api.get("/messages", conversationId );
 }
 export async function createMessage(payload) {
   return api.post("/messages", payload);

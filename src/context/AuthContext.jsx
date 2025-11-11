@@ -21,6 +21,8 @@ export function AuthProvider({ children }) {
     if (user?.jwtToken) setAuthToken(user.jwtToken);
   }, [user]);
 
+// TODO: Se till att antingen skicka felmeddelande när jwtToken har gått ut eller stanna så länge jag kan.
+
   async function login({ username, password }) {
     setLoading(true);
     try {

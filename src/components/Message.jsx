@@ -6,8 +6,8 @@ export default function Message({ msg, isOwn, onDelete }) {
           isOwn ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
         }`}
       >
-        <div className="text-sm">{msg.content}</div>
-        <div className="text-xs mt-2 text-gray-200">
+        <div className="text-sm">{msg.text}</div>
+        <div className="text-xs mt-2 text-black-200">
           {new Date(msg.createdAt || Date.now()).toLocaleString()}
         </div>
         {isOwn && (

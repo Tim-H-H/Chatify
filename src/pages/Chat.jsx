@@ -8,29 +8,40 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import AuthContext from "../context/AuthContext";
 import Message from "../components/Message";
+import { fakeData } from "../fakeChat.js";
+
+// const fakeConversationId = "fake-local-conversation";
+// const fakeWrittenMessages = [
+//   {id: "f1", text: "Hej, detta är ett fejkmeddelande.", userId: "fakeUser1", avatar: "https://i.pravatar.cc/100?img=1" },
+//   {id: "f2", text: "Välkommen till Chatify!", userId: "fakeUser2", avatar: "https://i.pravatar.cc/100?img=2" },
+// ];
+
 
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
+  const [fakeMessages, setFakeMessages] = useState([]);
+  const [newFakeMsg, setFakeMsg] = useState("");
 
-  // useEffect(() => {
-  //   fetchConversations();
-  // }, []);
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
-useEffect(() => {
-  console.log("useEffect - fetchconversations");
-  if(user?.jwtToken) fetchConversations();
-}, [user?.jwtToken]);
+// useEffect(() => {
+//   console.log("useEffect - fetchconversations");
+//   if(user?.jwtToken) fetchConversations();
+// }, [user?.jwtToken]);
 
 
 
   useEffect(() => {
     console.log("useEffect - fetchMessagesFor");
-    if (selectedId) fetchMessagesFor(selectedId);
-  }, [selectedId]);
+    console.log("useEffect: selectedConversationId: ", selectedConversation);
+    if (selectedConversation) fetchMessagesFor(selectedConversation);
+  }, [selectedConversation]);
 
   async function fetchConversations() {
     try {
@@ -38,13 +49,10 @@ useEffect(() => {
       // console.log("csrftoken: ", user.csrftoken);
       console.log("user: ", user);
 
-      // console.log("TRY - fetchConversations - selectedId: ", selectedId);
       const response = await getConversations();
       console.log("response: ", response)
-      // const data = response.data || {};
       const conversationGroups = response.data || {};
 
-      // console.log("data: ", data);
       const ids = Array.from(
         new Set([
           ...(conversationGroups.invitesReceived || []),
@@ -53,17 +61,25 @@ useEffect(() => {
         ])
       );
 
+      console.log("ids: ", ids);
+
       if (ids.length) {
         const list = ids.map((id) => ({ id, title: id }));
+
         setConversations(list);
-        setSelectedId(list[0].id);
-      } else {
+        setSelectedConversation(list[0].id);
+      } 
+      else {
         const fallback = [
-          { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
-          { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
+          { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 1" , userId: 1},
+          { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 2" , userId: 2},
         ];
+
         setConversations(fallback);
-        setSelectedId(fallback[0].id);
+        setSelectedConversation(fallback[0].id);
+
+         console.log("conversations: ", conversations);
+         console.log("selectedId: ", selectedConversation);
       }
     } catch (err) {
       console.error(
@@ -71,36 +87,46 @@ useEffect(() => {
         err
       );
       const fallback = [
-        { id: crypto?.randomUUID?.() || uuidv4(), title: "General (lokal)" },
-        { id: crypto?.randomUUID?.() || uuidv4(), title: "Projekt (lokal)" },
+        { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 1" , userId: 1},
+        { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 2" , userId: 2},
       ];
       setConversations(fallback);
-      setSelectedId(fallback[0].id);
+      setSelectedConversation(fallback[0].id);
     }
   }
 
-  async function fetchMessagesFor(conversationId) {
+  async function fetchMessagesFor(conversation) {
     try {
-      console.log("conversationId: ", conversationId);
-      const messageResult = await getMessages({ conversationId });
-      const raw = messageResult.data || [];
-      const normalized = raw.map((m) => ({
-        ...m,
-        id: m.id ?? m._id ?? m.messageId,
-        content: m.content ?? m.text ?? "",
-        userId: m.userId ?? m.user?.id ?? m.user_id ?? null,
-        createdAt: m.createdAt ?? m.created_at ?? null,
-      }));
+      console.log("conversationId: ", conversation.id);
+      const messageResult = await getMessages( conversation.id );
+      const messages = messageResult.data ;
+      console.log("messages: ", messages);
 
-      // normalized.sort(
-      //   (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-      // );
+      if (selectedConversation.id === conversation.id) {
 
-      if (selectedId === conversationId) {
-        setMessages(normalized);
+        const mergedMessages = [];
+        console.log("conversation.userId: ", conversation.userId);
+        fakeData.forEach((fakeMessage, i) => {
+          if(messages[i] && messages[i].text && messages[i].text === fakeMessage.question) {
+            mergedMessages.push(messages[i]);
+            mergedMessages.push({userId: conversation.userId, text: fakeMessage.response });
+          } else {
+
+          }
+
+        })
+        console.log("mergedMessages: ", mergedMessages);
+
+        
+
+        // TODO: 1. Deklarera en variabel som är en array som heter mergedMessages.
+        // 2. Loopa igenom messages med forEach. För varje iteration så ska man pusha ett fejk meddelande efter mitt meddelande, beroende på vilken frågan. 
+        // array.push exempel: const test = []; test.push("Hej"); console.log(test); // ["Hej"]
+        // test.push("då"); console.log(test); // ["Hej", "då"]
+        setMessages(mergedMessages);
       }
     } catch (err) {
-      console.error("Kunde inte hämta meddelanden", err);
+      console.error("Chat.jsx: fetchMessagesFor: Kunde inte hämta meddelanden", err);
       setMessages([]);
     }
   }
@@ -108,14 +134,12 @@ useEffect(() => {
   async function handleSend() {
     if (!newMsg.trim()) return;
     const clean = newMsg.trim();
-    // console.log("clean: ", clean);
-    // console.log("selectedId: ", selectedId);
     try {
-      await createMessage({ text: clean, conversationId: selectedId });
+      await createMessage({ text: clean, conversationId: selectedConversation.id });
       setNewMsg("");
-      fetchMessagesFor(selectedId);
+      fetchMessagesFor(selectedConversation);
     } catch (err) {
-      console.error("Skickfel", err);
+      console.error("Chat.jsx: handleSend(): ", err);
     }
   }
 
@@ -123,9 +147,9 @@ useEffect(() => {
     if (!confirm("Vill du radera meddelandet?")) return;
     try {
       await deleteMessage(msgId);
-      fetchMessagesFor(selectedId);
+      fetchMessagesFor(selectedConversation);
     } catch (err) {
-      console.error("Radera fel", err);
+      console.error("Chat.jsx: handleDelete(msgId): Kunde inte radera ditt meddelande", err);
     }
   }
 
@@ -134,12 +158,12 @@ useEffect(() => {
       <aside className="w-1/4 bg-white p-4 rounded shadow">
         <h3 className="font-semibold mb-3">Konversationer</h3>
         <ul className="space-y-2">
-          {conversations.map((conversation) => (
+          {conversations.length ? conversations.map((conversation) => (
             <li key={conversation.id}>
               <button
-                onClick={() => setSelectedId(conversation.id)}
+                onClick={() => setSelectedConversation(conversation)}
                 className={`w-full text-left px-3 py-2 rounded ${
-                  selectedId === conversation.id
+                  selectedConversation.id === conversation.id
                     ? "bg-blue-100"
                     : "hover:bg-gray-50"
                 }`}
@@ -147,12 +171,12 @@ useEffect(() => {
                 {conversation.title || conversation.name || conversation.id}
               </button>
             </li>
-          ))}
+          )) : "Inga konversationer än..." }
         </ul>
       </aside>
 
       <section className="flex-1 bg-white p-4 rounded shadow flex flex-col">
-        {!selectedId ? (
+        {!selectedConversation ? (
           <div className="text-gray-500">Välj en konversation</div>
         ) : (
           <>
@@ -162,9 +186,9 @@ useEffect(() => {
               )}
               {messages.map((msg) => (
                 <Message
-                  key={msg.id || msg._id}
+                  key={msg.id}
                   msg={msg}
-                  isOwn={(msg.userId || msg.user?.id) === user.id}
+                  isOwn={msg.userId === user.id}
                   onDelete={handleDelete}
                 />
               ))}
