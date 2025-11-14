@@ -23,8 +23,6 @@ export default function Chat() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
-  const [fakeMessages, setFakeMessages] = useState([]);
-  const [newFakeMsg, setFakeMsg] = useState("");
 
   useEffect(() => {
     fetchConversations();
@@ -39,7 +37,7 @@ export default function Chat() {
 
   useEffect(() => {
     console.log("useEffect - fetchMessagesFor");
-    console.log("useEffect: selectedConversationId: ", selectedConversation);
+    console.log("useEffect: selectedConversation: ", selectedConversation);
     if (selectedConversation) fetchMessagesFor(selectedConversation);
   }, [selectedConversation]);
 
@@ -61,11 +59,10 @@ export default function Chat() {
         ])
       );
 
-      console.log("ids: ", ids);
-
       if (ids.length) {
-        const list = ids.map((id) => ({ id, title: id }));
-
+        const list = ids.map((id) => ({ id: id, title: id }));
+        
+        console.log("list: ", list);
         setConversations(list);
         setSelectedConversation(list[0].id);
       } 
@@ -96,28 +93,53 @@ export default function Chat() {
   }
 
   async function fetchMessagesFor(conversation) {
-    try {
+    try {      
+      console.log("conversation: ", conversation);
       console.log("conversationId: ", conversation.id);
       const messageResult = await getMessages( conversation.id );
-      const messages = messageResult.data ;
-      console.log("messages: ", messages);
+      const messageItems = messageResult.data ;
+      console.log("messageItems: ", messageItems);
 
       if (selectedConversation.id === conversation.id) {
 
         const mergedMessages = [];
         console.log("conversation.userId: ", conversation.userId);
-        fakeData.forEach((fakeMessage, i) => {
-          if(messages[i] && messages[i].text && messages[i].text === fakeMessage.question) {
-            mergedMessages.push(messages[i]);
-            mergedMessages.push({userId: conversation.userId, text: fakeMessage.response });
-          } else {
+      //   if(messages && messages.length) {
+      //   fakeData.forEach((fakeMessage, i) => {
+      //     if(messages[i] && messages[i].text && messages[i].text === fakeMessage.question) {
+      //       mergedMessages.push(messages[i]);
+      //       mergedMessages.push({userId: conversation.userId, text: fakeMessage.response });
+      //     } else {
+      //       mergedMessages.push(messages[i]);
+      //       // console.log("fetchMessagesFor: if satsen gick inte igenom");
+      //     }
+      //   })
+      // }
 
+      // messageItems.forEach(msg => {
+      //   mergedMessages.push(msg);
+      //   fakeData.forEach(fakeMessage =>  {
+      //   if(fakeData.find(fakeMessage => msg.text === fakeMessage.question)) {
+      //     mergedMessages.push(fakeData.find(fakeMessage => fakeMessage.response));
+      //   }
+      //   })
+      // });
+      
+      
+      messageItems.forEach((msg) => {
+        mergedMessages.push(msg);
+
+        fakeData.forEach((item) => {
+          if (msg.text === item.question) {
+            mergedMessages.push({text: item.response});
           }
-
-        })
-        console.log("mergedMessages: ", mergedMessages);
-
-        
+        });
+        if (fakeData.every((item) => msg.text !== item.question)) {
+          mergedMessages.push({userId: undefined, text: "vet inte?"});
+        }
+      });
+      console.log("mergedMessages: ", mergedMessages);
+      
 
         // TODO: 1. Deklarera en variabel som är en array som heter mergedMessages.
         // 2. Loopa igenom messages med forEach. För varje iteration så ska man pusha ett fejk meddelande efter mitt meddelande, beroende på vilken frågan. 

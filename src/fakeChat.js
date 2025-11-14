@@ -1,30 +1,38 @@
 export const fakeData = [
-    {
-        question : "Are you into design?",
-        response : "Nah, not really.",
-    },
-    {
-        question : "Are you into programming? Maybe websites too?",
-        response : "Yes, I do!",
-    },
-    {
-        question : "Have you every played with Codepen?",
-        response : "I dabble occasionally",
-    },
-    {
-        question : "Okay well are you into reading/ writing? I write articles regularly on Medium.",
-        response : "That's so cool, show me your work!", 
-    },
-    {
-        question : "Are you into makeup or maybe you have a cool creative flare?",
-        response : "YASSS, I love a snatched look.", 
-    },
-    {
-        question : "Okay, you like dogs right?",
-        response : "SHOW ME THE DOGGOS!",
-    },
-    {
-        question : "Well, I suppose you can check out my Linkedin?",
-        response : "Sure",
-    }
+{
+  question: "Gillar du att designa saker, typ appar eller posters?",
+  response: "Ja, det är faktiskt rätt kul!",
+},
+{
+  question: "Tycker du om att programmera eller bygga hemsidor?",
+  response: "Ja, jag försöker lära mig mer hela tiden.",
+},
+{
+  question: "Har du någonsin testat att koda i CodePen eller liknande?",
+  response: "Ja, jag har lekt lite där.",
+},
+{
+  question: "Brukar du läsa eller skriva texter, typ bloggar eller artiklar?",
+  response: "Jag skriver lite då och då.",
+},
+{
+  question: "Är du en kreativ person, typ att du gillar smink, mode eller styling?",
+  response: "Jag älskar att experimentera med min stil.",
+},
+{
+  question: "Är du en hundmänniska eller kattmänniska?",
+  response: "100% hundmänniska, inga tvekan.",
+},
+{
+  question: "Kollar du ofta på serier eller filmer?",
+  response: "Ja, det blir nog lite för många ibland.",
+},
+{
+  question: "Spelar du några tv- eller datorspel?",
+  response: "Japp, när jag hinner!",
+},
+{
+  question: "Är du intresserad av personlig utveckling och sånt?",
+  response: "Ja, jag försöker jobba på mig själv.",
+}
 ];
