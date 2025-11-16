@@ -14,9 +14,6 @@ export default function Register() {
   async function onSubmit(e) {
     e.preventDefault();
     setError(null);
-
-    console.log("Registering user with data:", form);
-
     const payload = {
       username: form.username.trim(),
       email: form.email.trim(),
@@ -26,12 +23,9 @@ export default function Register() {
     };
 
     try {
-      // Lägg in ett request till fetchCsrf så du har token här.
-      // Lägg till resultatet av det i payload.
       const res = await fetchCsrf();
       const csrfToken = res.data?.csrfToken;
       payload.csrfToken = csrfToken;
-      console.log("CSRF response", res.data);
       await registerUser(payload);
       alert("Registrering lyckades! Logga in.");
       navigate("/login");
@@ -39,7 +33,7 @@ export default function Register() {
       const msg =
         err?.response?.data?.message || err?.response?.data || err.message;
       setError(msg.error);
-      console.log("Registration error:", msg);
+      console.warn("Registration error:", msg);
     }
   }
 

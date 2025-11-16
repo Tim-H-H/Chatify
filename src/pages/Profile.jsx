@@ -5,7 +5,6 @@ import { getUser, updateUser, deleteUser } from "../api";
 export default function Profile() {
   const { user, logout, setUser } = useContext(AuthContext);
   const [form, setForm] = useState({ username: "", email: "", avatar: "" });
-  // const [preview, setPreview] = useState(null);
   const [msg, setMsg] = useState(null);
 
   useEffect(() => {
@@ -15,7 +14,6 @@ export default function Profile() {
           const result = await getUser(user.id);
           const userResult = result.data;
           setForm({ username: userResult.username || "", email: userResult.email || "", avatar: userResult.avatar || "" });
-          // setPreview(userResult.avatar || "");
         } catch (err) {
           console.error(err);
         }
@@ -26,7 +24,6 @@ export default function Profile() {
   function onChange(e) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    // if (name === "avatar") setPreview(value);
   }
 
   async function onSave(e) {

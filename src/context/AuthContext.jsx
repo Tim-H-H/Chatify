@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
       const jwtToken = tokenAuthResult.data?.token;
       try {
         decoded = jwtDecode(jwtToken);
-        console.log("decoded: ", decoded);
       } catch (err) {
         console.warn("AuthContext.jsx: login: Kunde inte dekoda token", err);
       }

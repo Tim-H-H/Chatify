@@ -22,7 +22,7 @@ export default function Login() {
     } catch (error) {
       setError(true);
       setErrorMsg("Ogiltiga inloggningsuppgifter");
-      console.log("Login.jsx: onSubmit: Error:", error);
+      console.warn("Login.jsx: onSubmit: Error:", error);
     }
   }
 

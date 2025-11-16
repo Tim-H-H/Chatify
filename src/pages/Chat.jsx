@@ -10,13 +10,6 @@ import AuthContext from "../context/AuthContext";
 import Message from "../components/Message";
 import { fakeData } from "../fakeChat.js";
 
-// const fakeConversationId = "fake-local-conversation";
-// const fakeWrittenMessages = [
-//   {id: "f1", text: "Hej, detta är ett fejkmeddelande.", userId: "fakeUser1", avatar: "https://i.pravatar.cc/100?img=1" },
-//   {id: "f2", text: "Välkommen till Chatify!", userId: "fakeUser2", avatar: "https://i.pravatar.cc/100?img=2" },
-// ];
-
-
 export default function Chat() {
   const { user } = useContext(AuthContext);
   const [conversations, setConversations] = useState([]);
@@ -28,27 +21,13 @@ export default function Chat() {
     fetchConversations();
   }, []);
 
-// useEffect(() => {
-//   console.log("useEffect - fetchconversations");
-//   if(user?.jwtToken) fetchConversations();
-// }, [user?.jwtToken]);
-
-
-
   useEffect(() => {
-    console.log("useEffect - fetchMessagesFor");
-    console.log("useEffect: selectedConversation: ", selectedConversation);
     if (selectedConversation) fetchMessagesFor(selectedConversation);
   }, [selectedConversation]);
 
   async function fetchConversations() {
     try {
-      // console.log("jwtToken: ", user.jwtToken );
-      // console.log("csrftoken: ", user.csrftoken);
-      console.log("user: ", user);
-
       const response = await getConversations();
-      console.log("response: ", response)
       const conversationGroups = response.data || {};
 
       const ids = Array.from(
@@ -62,7 +41,6 @@ export default function Chat() {
       if (ids.length) {
         const list = ids.map((id) => ({ id: id, title: id }));
         
-        console.log("list: ", list);
         setConversations(list);
         setSelectedConversation(list[0].id);
       } 
@@ -71,12 +49,8 @@ export default function Chat() {
           { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 1" , userId: 1},
           { id: crypto?.randomUUID?.() || uuidv4(), title: "Fake Konversation 2" , userId: 2},
         ];
-
         setConversations(fallback);
         setSelectedConversation(fallback[0].id);
-
-         console.log("conversations: ", conversations);
-         console.log("selectedId: ", selectedConversation);
       }
     } catch (err) {
       console.error(
@@ -94,57 +68,22 @@ export default function Chat() {
 
   async function fetchMessagesFor(conversation) {
     try {      
-      console.log("conversation: ", conversation);
-      console.log("conversationId: ", conversation.id);
       const messageResult = await getMessages( conversation.id );
       const messageItems = messageResult.data ;
-      console.log("messageItems: ", messageItems);
-
       if (selectedConversation.id === conversation.id) {
 
         const mergedMessages = [];
-        console.log("conversation.userId: ", conversation.userId);
-      //   if(messages && messages.length) {
-      //   fakeData.forEach((fakeMessage, i) => {
-      //     if(messages[i] && messages[i].text && messages[i].text === fakeMessage.question) {
-      //       mergedMessages.push(messages[i]);
-      //       mergedMessages.push({userId: conversation.userId, text: fakeMessage.response });
-      //     } else {
-      //       mergedMessages.push(messages[i]);
-      //       // console.log("fetchMessagesFor: if satsen gick inte igenom");
-      //     }
-      //   })
-      // }
-
-      // messageItems.forEach(msg => {
-      //   mergedMessages.push(msg);
-      //   fakeData.forEach(fakeMessage =>  {
-      //   if(fakeData.find(fakeMessage => msg.text === fakeMessage.question)) {
-      //     mergedMessages.push(fakeData.find(fakeMessage => fakeMessage.response));
-      //   }
-      //   })
-      // });
-      
-      
-      messageItems.forEach((msg) => {
+        messageItems.forEach((msg) => {
         mergedMessages.push(msg);
-
         fakeData.forEach((item) => {
           if (msg.text === item.question) {
             mergedMessages.push({text: item.response});
           }
         });
         if (fakeData.every((item) => msg.text !== item.question)) {
-          mergedMessages.push({userId: undefined, text: "vet inte?"});
+          mergedMessages.push({userId: undefined, text: "Va? Vad pratar du om?"});
         }
       });
-      console.log("mergedMessages: ", mergedMessages);
-      
-
-        // TODO: 1. Deklarera en variabel som är en array som heter mergedMessages.
-        // 2. Loopa igenom messages med forEach. För varje iteration så ska man pusha ett fejk meddelande efter mitt meddelande, beroende på vilken frågan. 
-        // array.push exempel: const test = []; test.push("Hej"); console.log(test); // ["Hej"]
-        // test.push("då"); console.log(test); // ["Hej", "då"]
         setMessages(mergedMessages);
       }
     } catch (err) {
